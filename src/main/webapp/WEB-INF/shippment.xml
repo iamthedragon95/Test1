@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+	<!-- Executed when webFlow is triggered -->
+	<on-start>
+		<evaluate expression="shippmenthandler.initFlow()" result="flowScope.shippingdetails" />
+	</on-start>
+	<view-state id="start" view="shipping" model="flowScope.shippingdetails">
+		<transition on="submit" to="validate" />
+	</view-state>
+	<action-state id="validate">
+		<evaluate
+			expression="shippmenthandler.validateDetails(shippingdetails,messageContext)"></evaluate>
+		<transition on="success" to="confirm" />
+		<transition on="failure" to="start" />
+	</action-state>
+	<view-state id="confirm" view="shippingcart" model="flowScope.shippingdetails">
+		<transition on="edit" to="start" />
+		<transition on="submit" to="save" />
+	</view-state>
+	<action-state id="save">
+		<evaluate expression="shippmenthandler.save(shippingdetails)" />
+		<transition to="savecart"></transition>
+	</action-state>
+	<action-state id="savecart">
+		<evaluate expression="shippmenthandler.savecart(shippingdetails)" />
+		<transition to="final"></transition>
+	</action-state>
+	<view-state id="final" view="payment" model="flowScope.shippingdetails">
+		<transition on="submit" to="last" />
+	</view-state>
+	<action-state id="last">
+	<evaluate expression="ordercontroller.saveorder(shippingdetails)" />
+	<transition to="jpgpage" />
+	</action-state>
+	<end-state id="jpgpage" view="success"></end-state>
+</flow>
